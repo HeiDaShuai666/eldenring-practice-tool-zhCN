@@ -23,7 +23,7 @@ impl ReadWrite for Quitout {
     }
 
     fn label(&self) -> &str {
-        "Quitout"
+        "快速退到游戏主菜单"
     }
 }
 
