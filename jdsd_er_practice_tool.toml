@@ -24,8 +24,8 @@ commands = [
 
   { flag = "no_damage" },
   { flag = "no_stamina_consume", hotkey = "f5"},
-  { flags = ["no_fp_consume", "no_ashes_of_war_fp_consume"], , hotkey = "f5", label = "无限专注" },
-  { flags = ["no_goods_consume", "no_arrows_consume"], , hotkey = "f5",label = "无限消耗品" },
+  { flags = ["no_fp_consume", "no_ashes_of_war_fp_consume"],  hotkey = "f5", label = "无限专注" },
+  { flags = ["no_goods_consume", "no_arrows_consume"],  hotkey = "f5",label = "无限消耗品" },
   { flag = "deathcam"},
   { flags = ["no_dead" ,"no_hit"], hotkey = "f5", label = "无敌"},
   { flag = "one_shot", hotkey = "f4" },
@@ -50,9 +50,9 @@ hide = "rshift+0"
 dxgi_debug = false
 show_console = false
 indicators = [
-  { indicator = "game_version", enabled = true },
-  { indicator = "igt", enabled = true },
-  { indicator = "position", enabled = false },
+  { indicator = "game_version", enabled = false },
+  { indicator = "igt", enabled = false },
+  { indicator = "position", enabled = true },
   { indicator = "position_change", enabled = false },
   { indicator = "animation", enabled = false },
   { indicator = "fps", enabled = false },
