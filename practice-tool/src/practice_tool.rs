@@ -280,7 +280,7 @@ impl PracticeTool {
 
                 ui.same_line();
 
-                if ui.small_button("Indicators") {
+                if ui.small_button("信息显示") {
                     ui.open_popup("##indicators_window");
                 }
 
