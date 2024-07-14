@@ -3,8 +3,8 @@ commands = [
   { item_spawner = "ctrl+u" },
   { character_stats = true },
   { warp = true },
-  { cycle_speed = [1.0, 3.0, 6.0], hotkey = "8" },
-  { runes = 10000, hotkey = "9" },
+  { cycle_speed = [0.5, 1.0, 2.0], hotkey = "f3" },
+  { runes = 100000, hotkey = "9" },
   { group = "瞬移至坐标", commands = [
     { nudge = 1.0, nudge_up = "[", nudge_down = "]" },
     { position = "h", save = "rshift+h" },
@@ -12,29 +12,30 @@ commands = [
     { position = "k", save = "rshift+k" },
   ]},
   { group = "绘制开关", commands = [
-    { flag = "show_map", hotkey = "f4" },
-    { flag = "show_chr", hotkey = "f5" },
-    { flag = "display_stable_pos", hotkey = "f6" },
-    { flag = "hitbox_high", hotkey = "f7" },
-    { flag = "hitbox_low", hotkey = "f8" },
+    { flag = "show_map" },
+    { flag = "show_chr" },
+    { flag = "display_stable_pos" },
+    { flag = "hitbox_high" },
+    { flag = "hitbox_low" },
     { flag = "hitbox_f" },
     { flag = "hitbox_character" },
-    { flags = ["weapon_hitbox1", "weapon_hitbox2", "weapon_hitbox3"], hotkey = "f9", label = "武器碰撞检测框" },
+    { flags = ["weapon_hitbox1", "weapon_hitbox2", "weapon_hitbox3"], label = "武器碰撞检测框" },
   ]},
 
-  { flag = "no_damage", hotkey = "1" },
-  { flag = "no_stamina_consume", hotkey = "2" },
-  { flags = ["no_fp_consume", "no_ashes_of_war_fp_consume"], hotkey = "3", label = "无限专注" },
-  { flags = ["no_goods_consume", "no_arrows_consume"], hotkey = "4", label = "无限消耗品" },
-  { flag = "deathcam", hotkey = "5" },
-  { flag = "no_dead", hotkey = "6" },
-  { flag = "one_shot", hotkey = "7" },
+  { flag = "no_damage" },
+  { flag = "no_stamina_consume"},
+  { flags = ["no_fp_consume", "no_ashes_of_war_fp_consume"],  label = "无限专注" },
+  { flags = ["no_goods_consume", "no_arrows_consume"], label = "无限消耗品" },
+  { flag = "deathcam"},
+  { flag = "no_dead" },
+  { flag = "one_shot" },
+  { flag = "runearc" },
   { target = "ctrl+n" },
-  { flag = "no_update_ai", hotkey = "f1" },
-  { flag = "gravity", hotkey = "f2" },
-  { flag = "torrent_gravity", hotkey = "f2" },
+  { flag = "no_update_ai", hotkey = "f2" },
+  { flag = "gravity", hotkey = "f1" },
+  { flag = "torrent_gravity", hotkey = "f1" },
   { flags = ["collision", "torrent_collision"], label = "无碰撞" },
-  { flag = "action_freeze", hotkey = "ctrl+l" },
+  { flag = "action_freeze" },
 
   { quitout = "p" },
 
@@ -48,3 +49,13 @@ display = "0"
 hide = "rshift+0"
 dxgi_debug = false
 show_console = false
+indicators = [
+  { indicator = "game_version", enabled = true },
+  { indicator = "igt", enabled = true },
+  { indicator = "position", enabled = false },
+  { indicator = "position_change", enabled = false },
+  { indicator = "animation", enabled = false },
+  { indicator = "fps", enabled = false },
+  { indicator = "framecount", enabled = false },
+  { indicator = "imgui_debug", enabled = false }
+]
