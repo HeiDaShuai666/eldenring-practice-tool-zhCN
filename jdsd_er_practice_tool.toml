@@ -27,7 +27,7 @@ commands = [
   { flags = ["no_fp_consume", "no_ashes_of_war_fp_consume"],  hotkey = "f5", label = "无限专注" },
   { flags = ["no_goods_consume", "no_arrows_consume"],  hotkey = "f5",label = "无限消耗品" },
   { flag = "deathcam"},
-  { flags = ["no_dead" ,"no_hit"], hotkey = "f5", label = "无敌"},
+  { flag = "no_dead" , hotkey = "f5" },
   { flag = "one_shot", hotkey = "f4" },
   { flag = "runearc" },
   { target = "ctrl+n" },
