@@ -124,8 +124,8 @@ impl From<(u32, u32, u32)> for Version {
             (2, 0, 1) => Version::V2_00_1,
             (2, 2, 0) => Version::V2_02_0,
             (2, 2, 3) => Version::V2_02_3,
+            (2, 3, 0) => Version::V2_03_0,
             (maj, min, patch) => {
-                (2, 3, 0) => Version::V2_03_0,
                 log::error!("Unrecognized version {maj}.{min:02}.{patch}");
                 panic!()
             },
