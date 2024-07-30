@@ -1,6 +1,11 @@
+use std::f32::consts::PI;
+use std::fmt::Write;
+
+use imgui::sys::{igGetCursorPosX, igGetCursorPosY, igGetWindowPos, ImVec2};
 use imgui::{ProgressBar, StyleColor};
 use libeldenring::memedit::PointerChain;
 use libeldenring::pointer_chain;
+use libeldenring::prelude::Position as ErPosition;
 use practice_tool_core::key::Key;
 use practice_tool_core::widgets::Widget;
 use windows::Win32::System::Memory::{
@@ -17,6 +22,7 @@ struct EnemyInfo {
     max_sp: u32,
     res: EnemyResistances,
     poise: PoiseMeter,
+    position: EntityPosition,
 }
 
 #[derive(Debug, Default)]
@@ -47,12 +53,25 @@ struct PoiseMeter {
     poise_time: f32,
 }
 
+#[derive(Debug, Default)]
+#[repr(C)]
+struct EntityPosition {
+    angle1: f32,
+    unk1: [f32; 3],
+    angle2: f32,
+    unk2: [f32; 2],
+    x: f32,
+    y: f32,
+    z: f32,
+}
+
 struct EntityPointerChains {
     hp: PointerChain<[u32; 3]>,
     sp: PointerChain<[u32; 3]>,
     mp: PointerChain<[u32; 3]>,
     res: PointerChain<EnemyResistances>,
     poise: PointerChain<PoiseMeter>,
+    position: PointerChain<EntityPosition>,
 }
 
 #[derive(Debug)]
@@ -64,13 +83,20 @@ pub(crate) struct Target {
     hotkey: Option<Key>,
     is_enabled: bool,
     entity_addr: u64,
+    player_position: ErPosition,
+    
+    distance_text: String,
 }
 
 unsafe impl Send for Target {}
 unsafe impl Sync for Target {}
 
 impl Target {
-    pub(crate) fn new(detour_addr: PointerChain<u64>, hotkey: Option<Key>) -> Self {
+    pub(crate) fn new(
+        detour_addr: PointerChain<u64>,
+        player_position: ErPosition,
+        hotkey: Option<Key>,
+    ) -> Self {
         let detour_addr = detour_addr.cast();
         let mut allocate_near = detour_addr.eval().unwrap() as usize;
 
@@ -100,6 +126,9 @@ impl Target {
             hotkey,
             is_enabled: false,
             entity_addr: 0,
+            player_position,
+            
+            distance_text: String::new(),
         }
     }
 
@@ -114,6 +143,7 @@ impl Target {
             mp: pointer_chain!(self.entity_addr as usize + 0x190, 0, 0x148),
             res: pointer_chain!(self.entity_addr as usize + 0x190, 0x20, 0x10),
             poise: pointer_chain!(self.entity_addr as usize + 0x190, 0x40, 0x10),
+            position: pointer_chain!(self.entity_addr as usize + 0x190, 0x68, 0x54),
         };
 
         let [hp, _, max_hp] = epc.hp.read()?;
@@ -121,8 +151,9 @@ impl Target {
         let [mp, _, max_mp] = epc.mp.read()?;
         let res = epc.res.read()?;
         let poise = epc.poise.read()?;
+        let position = epc.position.read()?;
 
-        Some(EnemyInfo { hp, max_hp, mp, max_mp, sp, max_sp, res, poise })
+        Some(EnemyInfo { hp, max_hp, mp, max_mp, sp, max_sp, res, poise, position })
     }
 
     fn enable(&mut self) {
@@ -202,13 +233,16 @@ impl Widget for Target {
             return;
         }
 
-        let Some(EnemyInfo { hp, max_hp, mp, max_mp, sp, max_sp, res, poise }) = self.get_data()
+        let Some(EnemyInfo { hp, max_hp, mp, max_mp, sp, max_sp, res, poise, position }) =
+            self.get_data()
         else {
             if self.is_enabled {
                 ui.text("得先锁定敌人，身上会有白点")
             };
             return;
         };
+
+        let player_chunk_position = self.player_position.read();
 
         let PoiseMeter { poise, poise_max, _unk, poise_time } = poise;
 
@@ -289,6 +323,58 @@ impl Widget for Target {
         pbar("冰冻", frost, frost_max, COLOR_FROST);
         pbar("催眠", sleep, sleep_max, COLOR_SLEEP);
         pbar("癫狂", mad, mad_max, COLOR_MAD);
+        
+        ui.new_line();
+
+        if let Some([x, y, z, _r1, _r2]) = player_chunk_position {
+            let distance =
+                ((position.x - x).powf(2.) + (position.y - y).powf(2.) + (position.z - z).powf(2.))
+                    .sqrt();
+
+            let angle = f32::atan((x - position.x) / (z - position.z));
+            let enemy_angle = f32::asin(position.angle1) * 2.0;
+
+            let mut relative_angle = if (z - position.z) >= 0.0 {
+                enemy_angle - angle
+            } else {
+                (enemy_angle - angle) + PI
+            };
+
+            if relative_angle < 0.0 {
+                relative_angle += 2.0 * PI;
+            }
+
+            if relative_angle > 2.0 * PI {
+                relative_angle -= 2.0 * PI;
+            }
+
+                        relative_angle -= PI;
+
+            self.distance_text.clear();
+            write!(
+                &mut self.distance_text,
+                "{distance:>6.3}米 {:>8.3}度",
+                relative_angle * 180.0 / PI
+            )
+            .unwrap();
+            ui.text(&self.distance_text);
+            ui.same_line();
+            let [_, text_height] = ui.calc_text_size(&self.distance_text);
+
+            let draw_list = ui.get_foreground_draw_list();
+
+            let radius = text_height * 0.5;
+            let mut window_pos = ImVec2::default();
+            unsafe { igGetWindowPos(&mut window_pos) };
+            let x = unsafe { igGetCursorPosX() } + window_pos.x + radius;
+            let y = unsafe { igGetCursorPosY() } + window_pos.y + radius;
+            let dy = (-relative_angle.cos()) * radius;
+            let dx = (-relative_angle.sin()) * radius;
+
+            draw_list.add_circle([x, y], radius, [1.0, 1.0, 1.0]).build();
+            draw_list.add_line([x, y], [x + dx, y + dy], [1.0, 1.0, 1.0]).build();
+            ui.new_line();
+        }
     }
 
     fn interact(&mut self, ui: &imgui::Ui) {
